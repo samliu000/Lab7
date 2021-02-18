@@ -86,6 +86,9 @@
       function fetchAll() {
         let postParams = document.getElementById("recordForm");
         postParams.style.display = 'none';
+        let idContainer = document.getElementById("recordIDcontainer");
+        idContainer.style.display = 'none';
+
         // TODO
         let endpointInput = document.getElementById("endpoint");
         let fetchURL = endpointInput.value;
@@ -93,8 +96,7 @@
         .then(
           function(response) {
             if (response.status !== 200) {
-              console.log('Looks like there was a problem. Status Code: ' +
-                response.status);
+              document.getElementById("output").value = 'Network Error: ' + response.status;
               return;
             }
          
@@ -116,6 +118,8 @@
       function fetchOne() {
         let postParams = document.getElementById("recordForm");
         postParams.style.display = 'none';
+        let idContainer = document.getElementById("recordIDcontainer");
+        idContainer.style.display = 'none';
         // TODO
         let idOfPost = window.prompt("Enter record id");
         let endpointInput = document.getElementById("endpoint");
@@ -124,8 +128,7 @@
         .then(
           function(response) {
             if (response.status !== 200) {
-              console.log('Looks like there was a problem. Status Code: ' +
-                response.status);
+              document.getElementById("output").value = 'Network Error: ' + response.status;
               return;
             }
          
@@ -136,6 +139,7 @@
           }
         )
         .catch(function(err) {
+          console.log("hi");
           document.getElementById("output").value = 'Fetch Error :-S ' + err;
         });
       }
@@ -149,6 +153,8 @@
         if(whatToDo === 'show') {
           let postParams = document.getElementById("recordForm");
           postParams.style.display = 'initial';
+          let idContainer = document.getElementById("recordIDcontainer");
+          idContainer.style.display = 'none';
         }
         else {
           let authorName = document.getElementById("author").value;
@@ -177,10 +183,36 @@
       // From the 4 CRUD actions, this is the UPDATE action, and uses the PUT http method.
       // The main difference from createRecord() will be the URL you send data to; check
       // the writeup to view the URL pattern for create and update
-      function updateRecord() {
-        let postParams = document.getElementById("recordForm");
-        postParams.style.display = 'none';
+      function updateRecord(whatToDo) {
         // TODO
+        if(whatToDo === 'show') {
+          let postParams = document.getElementById("recordForm");
+          postParams.style.display = 'initial';
+          let idContainer = document.getElementById("recordIDcontainer");
+          idContainer.style.display = 'initial';
+        }
+        else {
+          let authorName = document.getElementById("author").value;
+          let titleName = document.getElementById("title").value;
+          let idTag = document.getElementById("recordID").value;
+          let endpointInput = document.getElementById("endpoint");
+ 
+          fetch(endpointInput.value+'/'+idTag, {
+            method: 'put',
+            headers: {
+              "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: 'author='+authorName+'&title='+titleName
+          })
+          .then(function(response) {
+            return response.json();
+          }).then(function(data) {
+            document.getElementById("output").value = JSON.stringify(data);
+          })
+          .catch(function (error) {
+            document.getElementById("output").value ='Request failed '+ error;
+          });
+        }
  
       }
  
@@ -192,7 +224,27 @@
       function deleteRecord() {
         let postParams = document.getElementById("recordForm");
         postParams.style.display = 'none';
-        // TODO
+        let idContainer = document.getElementById("recordIDcontainer");
+        idContainer.style.display = 'none';
+
+        let endpointInput = document.getElementById("endpoint");
+        let idTag = window.prompt("Enter record id");
+        
+        fetch(endpointInput.value+'/'+idTag, {
+            method: 'delete',
+            headers: {
+              "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            
+          })
+          .then(function(response) {
+            return response.json();
+          }).then(function(data) {
+            document.getElementById("output").value = JSON.stringify(data);
+          })
+          .catch(function (error) {
+            document.getElementById("output").value ='Request failed '+ error;
+          });
       }
  
       window.addEventListener('DOMContentLoaded', () => {
