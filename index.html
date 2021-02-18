@@ -5,16 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>REST Form Demo</title>
-
+ 
     <style>
       body {
         font-family: Arial;
       }
-
+ 
       #recordForm {
         display: none;
       }
-
+ 
       #recordIDcontainer {
         display: none;
       }
@@ -22,13 +22,13 @@
   </head>
   <body>
     <h1>Endpoint Tester</h1>
-
+ 
     <form id="actionForm">
-
+ 
       <label for="endpoint">Endpoint:</label>
       <input type="text" value="http://localhost:3000/posts" id="endpoint">
       <br />
-
+ 
       <label for="action">Action:</label>
       <select id="action">
         <option disabled>Pick CRUD Action:</option>
@@ -38,16 +38,16 @@
         <option value="Update">Update</option>
         <option value="Delete">Delete</option>
       </select>
-
+ 
       <button type="submit">Create Request</button>
     </form>
-
+ 
     <form id="recordForm">
       <div>
         <label for="author">Author</label>
         <input type="text" name="author" id="author" />
       </div>
-
+ 
       <div>
         <label for="title">Title: </label>
         <input
@@ -56,7 +56,7 @@
           id="title"
         />
       </div>
-
+ 
       <div id="recordIDcontainer">
         <label for="recordID">Record ID: </label>
         <input
@@ -65,18 +65,18 @@
           id="recordID"
         />
       </div>
-
+ 
       <div>
         <button type="submit">Execute</button>
       </div>
     </form>
-
+ 
     <hr />
-
+ 
     <div>
       <output id="output"></output>
     </div>
-
+ 
     <!-- Main Script -->
     <script type="module">
       // This function should fetch all of the data from the given endpoint.
@@ -84,42 +84,117 @@
       // The main difference from fetchOne() will be the URL you request from; check
       // the writeup to view the URL pattern for fetch one and fetch all
       function fetchAll() {
+        let postParams = document.getElementById("recordForm");
+        postParams.style.display = 'none';
         // TODO
+        let endpointInput = document.getElementById("endpoint");
+        let fetchURL = endpointInput.value;
+        fetch(fetchURL)
+        .then(
+          function(response) {
+            if (response.status !== 200) {
+              console.log('Looks like there was a problem. Status Code: ' +
+                response.status);
+              return;
+            }
+         
+            // Examine the text in the response
+            response.json().then(function(data) {
+              document.getElementById("output").value = JSON.stringify(data);
+            });
+          }
+        )
+        .catch(function(err) {
+          console.log('Fetch Error :-S', err);
+        });
       }
-
+ 
       // This function should fetch one entry from the given endpoint.
       // From the 4 CRUD actions, this is the READ action, and uses the GET http method.
       // The main difference from fetchAll() will be the URL you request from; check
       // the writeup to view the URL pattern for fetch one and fetch all
       function fetchOne() {
+        let postParams = document.getElementById("recordForm");
+        postParams.style.display = 'none';
         // TODO
+        let idOfPost = window.prompt("Enter record id");
+        let endpointInput = document.getElementById("endpoint");
+        let fetchURL = endpointInput.value + '/'+idOfPost;
+        fetch(fetchURL)
+        .then(
+          function(response) {
+            if (response.status !== 200) {
+              console.log('Looks like there was a problem. Status Code: ' +
+                response.status);
+              return;
+            }
+         
+            // Examine the text in the response
+            response.json().then(function(data) {
+              document.getElementById("output").value = JSON.stringify(data);
+            });
+          }
+        )
+        .catch(function(err) {
+          document.getElementById("output").value = 'Fetch Error :-S ' + err;
+        });
       }
-
+ 
       // This function should use fetch to create one entry in the given endpoint.
       // From the 4 CRUD actions, this is the CREATE action, and uses the POST http method.
       // The main difference from updateRecord() will be the URL you send data to; check
       // the writeup to view the URL pattern for create and update
-      function createRecord() {
+      function createRecord(whatToDo) {
         // TODO
+        if(whatToDo === 'show') {
+          let postParams = document.getElementById("recordForm");
+          postParams.style.display = 'initial';
+        }
+        else {
+          let authorName = document.getElementById("author").value;
+          let titleName = document.getElementById("title").value;
+          let endpointInput = document.getElementById("endpoint");
+ 
+          fetch(endpointInput.value, {
+            method: 'post',
+            headers: {
+              "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: 'author='+authorName+'&title='+titleName
+          })
+          .then(function(response) {
+            return response.json();
+          }).then(function(data) {
+            document.getElementById("output").value = JSON.stringify(data);
+          })
+          .catch(function (error) {
+            document.getElementById("output").value ='Request failed '+ error;
+          });
+        }
       }
-
+ 
       // This function should use fetch to update one existing entry in the given endpoint.
       // From the 4 CRUD actions, this is the UPDATE action, and uses the PUT http method.
       // The main difference from createRecord() will be the URL you send data to; check
       // the writeup to view the URL pattern for create and update
       function updateRecord() {
+        let postParams = document.getElementById("recordForm");
+        postParams.style.display = 'none';
         // TODO
+ 
       }
-
+ 
       // This function should use fetch to delete one existing entry in the given endpoint.
       // From the 4 CRUD actions, this is the DELETE action, and uses the DELETE http method.
       // The main difference from fetchOne() will be the HTTP method you use to make your
       // request; check the writeup to view the URL pattern for get one and delete. THERE IS NO 
       // delete all, only delete one.
       function deleteRecord() {
+        let postParams = document.getElementById("recordForm");
+        postParams.style.display = 'none';
         // TODO
       }
-
+ 
       window.addEventListener('DOMContentLoaded', () => {
         // Action Form Event Listener
         document
@@ -127,7 +202,7 @@
           .addEventListener("submit", event => {
             event.preventDefault();
             let command = document.getElementById('action').value;
-
+ 
             switch (command) {
               case "List All":
                 fetchAll();
@@ -148,7 +223,7 @@
                 alert("Error: Illegal Action");
             }
           });
-
+ 
         // Record Form Event Listener
         document
           .getElementById("recordForm")
@@ -171,3 +246,5 @@
     </script>
   </body>
 </html>
+ 
+
